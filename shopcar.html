@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		
+		<script src="jquery.min.js"></script>
+		
+		<link rel="stylesheet" href="main.css" />
+		<style>
+			.shoplist{
+				width: 1050px;
+			}
+			.shop-item{
+				width: 100%;
+				
+				/*border: 1px solid #d1d1d1;*/
+				margin: 20px auto;
+				text-align: center;
+			}
+			.fl{
+				float: left;
+			}
+			.shop-item input[type="checkbox"]{
+				width: 30px;
+				height: 30px;
+			}
+			.shop-item .fl{
+				padding: 10px;
+				width: 129px;
+				display: block;
+				font-style: normal;
+				height: 150px;
+				border: 1px solid #d1d1d1;
+				margin-left: -1px;
+			}
+			.shop-item .fl:after{
+				content: "";
+				display: inline-block;
+				vertical-align: middle;
+				height: 100%;
+			}
+			.shop-item .count > span{
+				display: inline-block;
+				width: 30px;
+				height: 30px;
+				border: 1px solid #d1d1d1;
+				line-height: 30px;
+				cursor: pointer;
+				margin-left: 5px;
+			}
+			#sum{
+				width: 1050px;
+				margin: 20px auto 100px;
+				text-align: right;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="shoplist">
+			<!--
+				'<div class="shop-item clearfix">'+
+					'<p class="fl"><input type="checkbox" class="ck"/></p>'+
+					'<img class="fl" src="img/'+ shopinfo.src +'" alt="" />'+
+					'<p class="fl">'+ shopinfo.name +'</p>'+
+					'<span class="fl">'+ shopinfo.price +'元</span>'+
+					'<p class="fl count" '+
+						'data-id="'+ shopinfo.id +'" '+
+						'data-price="'+ shopinfo.price +'" data-count="'+ shopinfo.count +'"'+
+						'data-name="'+ shopinfo.name +'" data-src="'+ shopinfo.src +'"'+
+						'>'+
+						'<span class="updateCount" data-number="1">+</span>'+
+						'<span class="shop-count">'+ shopinfo.count +'</span>'+
+						'<span class="updateCount" data-number="-1">-</span>'+
+					'</p>'+
+					'<em class="fl sumPrice">'+ (shopinfo.count * shopinfo.price) +'元</em>'+
+					'<i class="fl delBtn">删除</i>'+
+				'</div>';
+			-->
+		</div>
+		<div id="sum" class="clearfix">
+			共多少<span class="count2"></span>件商品，合计<span class="money2"></span>元
+			<label class="fl">
+				<input id="selectAll" type="checkbox"/>全选
+			</label>
+		</div>
+		
+	</body>
+</html>
+<script src="cookie.js"></script>
+<script>
+	window.onload = function() {
+		// var arr = getCookie('prolist');
+		// var str = '';
+		// for (var i = 0, len = arr.length; i < len; i++) {
+		// 	var shopinfo = arr[i];
+		// 	str += '<div class="shop-item clearfix">'+
+		// 			'<p class="fl"><input type="checkbox" class="ck"/></p>'+
+		// 			'<img class="fl" src="img/'+ shopinfo.src +'" alt="" />'+
+		// 			'<p class="fl">'+ shopinfo.name +'</p>'+
+		// 			'<span class="fl">'+ shopinfo.price +'元</span>'+
+		// 			'<p class="fl count" '+
+		// 				'data-id="'+ shopinfo.id +'" '+
+		// 				'data-price="'+ shopinfo.price +'" data-count="'+ shopinfo.num +'"'+
+		// 				'data-name="'+ shopinfo.name +'" data-src="'+ shopinfo.src +'"'+
+		// 				'>'+
+		// 				'<span class="updateCount" data-number="1">+</span>'+
+		// 				'<span class="shop-count">'+ shopinfo.num +'</span>'+
+		// 				'<span class="updateCount" data-number="-1">-</span>'+
+		// 			'</p>'+
+		// 			'<em class="fl sumPrice">'+ (shopinfo.num * shopinfo.price) +'元</em>'+
+		// 			'<i class="fl delBtn">删除</i>'+
+		// 		'</div>';
+		// }
+
+		var obj = getCookie('prolist');
+		console.log(obj);
+		var str = '';
+		//这里key是变量所以要用[]
+		for (var key in obj) {
+			var shopinfo = obj[key];
+			str += '<div class="shop-item clearfix">'+
+					'<p class="fl"><input type="checkbox" class="ck"/></p>'+
+					'<img class="fl" src="img/'+ shopinfo.src +'" alt="" />'+
+					'<p class="fl">'+ shopinfo.name +'</p>'+
+					'<span class="fl">'+ shopinfo.price +'元</span>'+
+					'<p class="fl count" '+
+						'data-id="'+ key +'" '+
+						'data-price="'+ shopinfo.price +'" data-count="'+ shopinfo.num +'"'+
+						'data-name="'+ shopinfo.name +'" data-src="'+ shopinfo.src +'"'+
+						'>'+
+						'<span class="updateCount" data-number="1">+</span>'+
+						'<span class="shop-count">'+ shopinfo.num +'</span>'+
+						'<span class="updateCount" data-number="-1">-</span>'+
+					'</p>'+
+					'<em class="fl sumPrice">'+ (shopinfo.num * shopinfo.price) +'元</em>'+
+					'<i class="fl delBtn">删除</i>'+
+				'</div>';
+		}
+		$('.shoplist').html(str);
+
+		//删除商品
+		$('.delBtn').click(function() {
+			var pid = $(this).parent().find('.count').data('id');
+			delete obj[pid];
+			setCookie('prolist', JSON.stringify(obj));
+			console.log(obj);
+			$(this).parent().remove();
+		});
+
+		//加减商品
+		$('.updateCount').click(function() {
+			var sign = $(this).html();
+			var pid = $(this).parent().data('id');
+			if (sign == '+') {
+				obj[pid].num++;
+			} else if (sign == '-' && obj[pid].num > 1) {
+				obj[pid].num--;
+			}
+			setCookie('prolist', JSON.stringify(obj));
+			$(this).parent().find('.shop-count').html(obj[pid].num);
+			$(this).parent().parent().find('.sumPrice').html(obj[pid].num * obj[pid].price + '元');
+			total();
+			console.log(obj);
+		});
+
+		//结算功能
+		function total() {
+			var count = 0;
+			var sum = 0;
+			
+			//遍历被选中的复选框
+			$('.ck:checked').each(function() {
+				count += parseInt($(this).parent().parent().find('.shop-count').html());
+				sum += parseInt($(this).parent().parent().find('.sumPrice').html());
+			});
+			$('.count2').html(count);
+			$('.money2').html(sum);
+		}
+
+		//复选框选中
+		$('.ck').click(function() {
+			total();
+		});
+
+		//全选
+		$('#selectAll').click(function() {
+			$('.ck').prop('checked', $(this).prop('checked'));
+			total();
+		});
+
+	}
+</script>
